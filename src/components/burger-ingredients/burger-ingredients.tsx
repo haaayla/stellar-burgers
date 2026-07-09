@@ -8,37 +8,12 @@ import { useSelector } from '../../services/store';
 
 export const BurgerIngredients: FC = () => {
   const { ingredients } = useSelector((state) => state.ingredients);
-  const { constructorItems } = useSelector((state) => state.burgerConstructor);
 
-  const getCount = (id: string) => {
-    if (constructorItems.bun?._id === id) {
-      return 1;
-    }
+  const buns = ingredients.filter((item) => item.type === 'bun');
 
-    return constructorItems.ingredients.filter((item) => item._id === id)
-      .length;
-  };
+  const mains = ingredients.filter((item) => item.type === 'main');
 
-  const buns = ingredients
-    .filter((item) => item.type === 'bun')
-    .map((item) => ({
-      ...item,
-      count: getCount(item._id)
-    }));
-
-  const mains = ingredients
-    .filter((item) => item.type === 'main')
-    .map((item) => ({
-      ...item,
-      count: getCount(item._id)
-    }));
-
-  const sauces = ingredients
-    .filter((item) => item.type === 'sauce')
-    .map((item) => ({
-      ...item,
-      count: getCount(item._id)
-    }));
+  const sauces = ingredients.filter((item) => item.type === 'sauce');
 
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
 
