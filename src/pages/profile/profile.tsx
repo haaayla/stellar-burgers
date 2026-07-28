@@ -1,49 +1,72 @@
-import { ProfileUI } from '@ui-pages';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 
+import { ProfileUI } from '@ui-pages';
+
+import { useDispatch, useSelector } from '../../services/store';
+import { updateUser } from '../../services/slices/userSlice';
+
 export const Profile: FC = () => {
-  /** TODO: взять переменную из стора */
-  const user = {
-    name: '',
-    email: ''
-  };
+  const dispatch = useDispatch();
+
+  const { user } = useSelector((state) => state.user);
 
   const [formValue, setFormValue] = useState({
-    name: user.name,
-    email: user.email,
-    password: ''
+    name: '',
+    email: '',
+    password: '******'
   });
 
   useEffect(() => {
-    setFormValue((prevState) => ({
-      ...prevState,
-      name: user?.name || '',
-      email: user?.email || ''
-    }));
+    if (!user) {
+      return;
+    }
+
+    setFormValue({
+      name: user.name,
+      email: user.email,
+      password: '******'
+    });
   }, [user]);
 
   const isFormChanged =
-    formValue.name !== user?.name ||
-    formValue.email !== user?.email ||
-    !!formValue.password;
+    formValue.name !== (user?.name || '') ||
+    formValue.email !== (user?.email || '') ||
+    formValue.password !== '******';
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+
+    const data = {
+      name: formValue.name,
+      email: formValue.email,
+      ...(formValue.password !== '******' && {
+        password: formValue.password
+      })
+    };
+
+    dispatch(updateUser(data));
   };
 
   const handleCancel = (e: SyntheticEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      return;
+    }
+
     setFormValue({
       name: user.name,
       email: user.email,
-      password: ''
+      password: '******'
     });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
     setFormValue((prevState) => ({
       ...prevState,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
   };
 
@@ -56,6 +79,4 @@ export const Profile: FC = () => {
       handleInputChange={handleInputChange}
     />
   );
-
-  return null;
 };

@@ -1,23 +1,50 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
+
 import { TIngredient } from '@utils-types';
 
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  clearCurrentOrder,
+  getOrderByNumber
+} from '../../services/slices/orderSlice';
+
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const dispatch = useDispatch();
 
-  const ingredients: TIngredient[] = [];
+  const { number } = useParams();
 
-  /* Готовим данные для отображения */
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
+
+  const feedOrders = useSelector((state) => state.feed.orders);
+  const profileOrders = useSelector((state) => state.profileOrders.orders);
+
+  const currentOrder = useSelector((state) => state.order.currentOrder);
+  const error = useSelector((state) => state.order.error);
+
+  const orderData =
+    [...feedOrders, ...profileOrders].find(
+      (order) => order.number === Number(number)
+    ) || currentOrder;
+
+  // Загружаем заказ только если его нет в store
+  useEffect(() => {
+    if (!number || orderData) return;
+
+    dispatch(getOrderByNumber(Number(number)));
+  }, [dispatch, number, orderData]);
+
+  // Очищаем currentOrder при размонтировании
+  useEffect(
+    () => () => {
+      dispatch(clearCurrentOrder());
+    },
+    [dispatch]
+  );
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -31,6 +58,7 @@ export const OrderInfo: FC = () => {
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
+
           if (ingredient) {
             acc[item] = {
               ...ingredient,
@@ -58,6 +86,10 @@ export const OrderInfo: FC = () => {
       total
     };
   }, [orderData, ingredients]);
+
+  if (error) {
+    return <p className='text text_type_main-medium mt-10'>{error}</p>;
+  }
 
   if (!orderInfo) {
     return <Preloader />;
