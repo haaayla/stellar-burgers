@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 const HAR_PATH = 'tests/hars/app.har';
+const API_URL = process.env.BURGER_API_URL!;
 
 test.describe('Конструктор бургера', () => {
   test.beforeEach(async ({ page }) => {
     await page.routeFromHAR(HAR_PATH, {
-      url: 'https://norma.education-services.ru/api/**',
+      url: `${API_URL}/**`,
       notFound: 'abort'
     });
   });
@@ -25,31 +26,30 @@ test.describe('Конструктор бургера', () => {
   }) => {
     await page.goto('/');
 
-    const bunCard = page
-      .locator('li')
-      .filter({ hasText: 'Краторная булка N-200i' });
+    const constructor = page.getByTestId('burger-constructor');
+
+    const bunCard = page.getByTestId(
+      'ingredient-643d69a5c3f7b9001cfa093c'
+    );
 
     await bunCard.getByRole('button').click();
 
-    const sauceCard = page
-      .locator('li')
-      .filter({ hasText: 'Соус традиционный галактический' });
+    const sauceCard = page.getByTestId(
+      'ingredient-643d69a5c3f7b9001cfa0944'
+    );
 
     await sauceCard.getByRole('button').click();
 
     await expect(
-      page.getByText('Краторная булка N-200i (верх)')
+      constructor.getByText('Краторная булка N-200i (верх)')
     ).toBeVisible();
 
     await expect(
-      page.getByText('Краторная булка N-200i (низ)')
+      constructor.getByText('Краторная булка N-200i (низ)')
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('section')
-        .nth(1)
-        .getByText('Соус традиционный галактический')
+      constructor.getByText('Соус традиционный галактический')
     ).toBeVisible();
   });
 
@@ -58,20 +58,22 @@ test.describe('Конструктор бургера', () => {
   }) => {
     await page.goto('/');
 
-    const bunCard = page
-      .locator('li')
-      .filter({ hasText: 'Краторная булка N-200i' });
+    const bunCard = page.getByTestId(
+      'ingredient-643d69a5c3f7b9001cfa093c'
+    );
 
     await bunCard.getByRole('link').click();
 
+    const modal = page.locator('#modals');
+
     await expect(
-      page.getByRole('heading', {
+      modal.getByRole('heading', {
         name: 'Детали ингредиента'
       })
     ).toBeVisible();
 
     await expect(
-      page.getByRole('heading', {
+      modal.getByRole('heading', {
         name: 'Краторная булка N-200i'
       })
     ).toBeVisible();
@@ -79,7 +81,7 @@ test.describe('Конструктор бургера', () => {
     await page.locator('#modals button').click();
 
     await expect(
-      page.getByRole('heading', {
+      modal.getByRole('heading', {
         name: 'Детали ингредиента'
       })
     ).toHaveCount(0);
@@ -104,15 +106,17 @@ test.describe('Конструктор бургера', () => {
 
     await page.goto('/');
 
-    const bunCard = page
-      .locator('li')
-      .filter({ hasText: 'Краторная булка N-200i' });
+    const constructor = page.getByTestId('burger-constructor');
+
+    const bunCard = page.getByTestId(
+      'ingredient-643d69a5c3f7b9001cfa093c'
+    );
 
     await bunCard.getByRole('button').click();
 
-    const sauceCard = page
-      .locator('li')
-      .filter({ hasText: 'Соус традиционный галактический' });
+    const sauceCard = page.getByTestId(
+      'ingredient-643d69a5c3f7b9001cfa0944'
+    );
 
     await sauceCard.getByRole('button').click();
 
@@ -124,14 +128,16 @@ test.describe('Конструктор бургера', () => {
 
     await orderButton.click();
 
+    const modal = page.locator('#modals');
+
     await expect(
-      page.getByText('идентификатор заказа')
+      modal.getByText('идентификатор заказа')
     ).toBeVisible({
       timeout: 30000
     });
 
     await expect(
-      page.getByRole('heading', {
+      modal.getByRole('heading', {
         name: '108695'
       })
     ).toBeVisible();
@@ -139,15 +145,15 @@ test.describe('Конструктор бургера', () => {
     await page.locator('#modals button').click();
 
     await expect(
-      page.getByText('идентификатор заказа')
+      modal.getByText('идентификатор заказа')
     ).toHaveCount(0);
 
     await expect(
-      page.getByText('Выберите булки')
+      constructor.getByText('Выберите булки')
     ).toHaveCount(2);
 
     await expect(
-      page.getByText('Выберите начинку')
+      constructor.getByText('Выберите начинку')
     ).toBeVisible();
   });
 });

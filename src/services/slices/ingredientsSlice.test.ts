@@ -1,9 +1,6 @@
 import { TIngredient } from '@utils-types';
 
-import reducer, {
-  getIngredients,
-  initialState
-} from './ingredientsSlice';
+import reducer, { getIngredients, initialState } from './ingredientsSlice';
 
 describe('ingredientsSlice', () => {
   test('должен вернуть initialState при неизвестном экшене', () => {
