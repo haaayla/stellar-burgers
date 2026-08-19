@@ -2,3 +2,16 @@ node_modules
 .env
 .idea
 dist
+
+# macOS
+.DS_Store
+
+# Coverage
+/coverage/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
